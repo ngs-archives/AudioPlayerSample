@@ -10,11 +10,18 @@ import UIKit
 import MediaPlayer
 
 class ViewController: UIViewController {
-    private var isPlaying = false
     @IBOutlet weak var playButton: UIButton!
+    @IBOutlet weak var debugLabel: UILabel!
+    @IBOutlet weak var progressView: UIProgressView!
 
+    var isPlaying = false
+    let tracks = ["one.mp3", "two.mp3", "three.mp3"]
+    let silentAudioFileName = "silent.mp3"
+    var fullItems: [AVPlayerItem] = []
     var player: AVQueuePlayer!
-    var playerLooper: AVPlayerLooper!
+    var timeObserverToken: Any?
+    private var playerItemContext = 0
+    private var playerContext = 0
     
     func activateAudioSession() throws {
         try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
@@ -23,15 +30,8 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        var items = [AVPlayerItem]()
-        ["go_up", "out_of_body", "ringo2_unreleased04"].forEach { trackName in
-            let url = Bundle.main.url(forResource: trackName, withExtension: "mp3")!
-            let item = AVPlayerItem(url: url)
-            items.append(item)
-        }
-        player = AVQueuePlayer(items: items)
-        playerLooper = AVPlayerLooper(player: player, templateItem: items[0])
         updateViews()
+        loadTracks()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -100,11 +100,154 @@ class ViewController: UIViewController {
     }
 
     func navigateToNextSentence(loop: Bool = false) {
-        player.advanceToNextItem()
+        var index: Int
+        if let currentIndex = currentIndex {
+            index = currentIndex + (currentIndex % 2 == 0 ? 2 : 1)
+        } else {
+            index = 0
+        }
+        if index >= fullItems.count {
+            if !loop {
+                return
+            }
+            index = 0
+        }
+        loadTracks(from: index)
+    }
+
+    var currentIndex: Int? {
+        guard
+            let currentItem = player.currentItem,
+            let index = fullItems.index(of: currentItem)
+            else {
+                return nil
+        }
+        return index
+    }
+
+    var playerItemDuration: CMTime {
+        guard let item = player?.currentItem, item.status == .readyToPlay else {
+            return kCMTimeInvalid
+        }
+        return item.duration
     }
 
     func navigateToPreviousSentence(loop: Bool = false) {
+        var index: Int
+        if let currentIndex = currentIndex {
+            index = currentIndex - (currentIndex % 2 == 0 ? 2 : 1)
+        } else {
+            index = -1
+        }
+        if index < 0 {
+            if loop {
+                index = fullItems.count - 2
+            } else {
+                return
+            }
+        }
+        loadTracks(from: index)
+    }
 
+    func loadTracks(from trackIndex: Int = 0) {
+        print(trackIndex)
+        fullItems = []
+        let silentURL = Bundle.main.url(forResource: silentAudioFileName, withExtension: nil)!
+        tracks.forEach { trackName in
+            let url = Bundle.main.url(forResource: trackName, withExtension: nil)!
+            fullItems.append(AVPlayerItem(url: url))
+            let silentItem = AVPlayerItem(url: silentURL)
+            silentItem.seek(to: CMTimeMakeWithSeconds(10, 1), completionHandler: nil)
+            fullItems.append(silentItem)
+        }
+        fullItems.forEach { item in
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(self.endPlaying),
+                name: .AVPlayerItemDidPlayToEndTime, object: item)
+            item.addObserver(self,
+                             forKeyPath: #keyPath(AVPlayerItem.status),
+                             options: [.old, .new],
+                             context: &playerItemContext)
+        }
+        let items = fullItems.suffix(from: trackIndex)
+        let isPlaying = player?.rate == 1
+        if let timeObserverToken = timeObserverToken {
+            player?.removeTimeObserver(timeObserverToken)
+        }
+        player = AVQueuePlayer(items: Array(items))
+        timeObserverToken = player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1, 1), queue: DispatchQueue.main) { [weak self] (time) in
+            guard let `self` = self else { return }
+
+            let duration = self.playerItemDuration
+            let progress: Float
+            if CMTIME_IS_VALID(duration) {
+                progress = Float(CMTimeGetSeconds(time) / CMTimeGetSeconds(duration))
+            } else {
+                progress = 0
+            }
+            self.progressView.progress = progress
+        }
+        player.addObserver(self,
+                           forKeyPath: #keyPath(AVPlayer.timeControlStatus),
+                           options: [.old, .new],
+                           context: &playerItemContext)
+        if isPlaying {
+            player.play()
+        }
+    }
+
+    @objc func endPlaying() {
+        if player.items().count <= 1 {
+            loadTracks(from: 0)
+        }
+    }
+
+    func updateLabel() {
+        let filename = (player.currentItem?.asset as? AVURLAsset)?.url.lastPathComponent
+        debugLabel.text = filename
+    }
+
+    override func observeValue(forKeyPath keyPath: String?,
+                               of object: Any?,
+                               change: [NSKeyValueChangeKey : Any]?,
+                               context: UnsafeMutableRawPointer?) {
+
+        // Only handle observations for the playerItemContext
+        switch context {
+        case &playerItemContext:
+            guard let playerItem = object as? AVPlayerItem,
+                keyPath == #keyPath(AVPlayerItem.status) else { return }
+            let status: AVPlayerItemStatus
+            if let statusNumber = change?[.newKey] as? NSNumber {
+                status = AVPlayerItemStatus(rawValue: statusNumber.intValue)!
+            } else {
+                status = .unknown
+            }
+            self.playerItem(playerItem, didChangeStatus: status)
+            return
+        case &playerContext:
+            guard
+                let player = object as? AVPlayer,
+                let statusNumber = change?[.newKey] as? NSNumber,
+                let status = AVPlayerTimeControlStatus(rawValue: statusNumber.intValue),
+                keyPath == #keyPath(AVPlayer.timeControlStatus) else { return }
+            self.player(player, didChangeTimeControlStatus: status)
+            return
+        default:
+            super.observeValue(forKeyPath: keyPath,
+                               of: object,
+                               change: change,
+                               context: context)
+            return
+        }
+    }
+
+    func playerItem(_ playerItem: AVPlayerItem, didChangeStatus status: AVPlayerItemStatus) {
+        updateLabel()
+    }
+
+    func player(_ player: AVPlayer, didChangeTimeControlStatus status: AVPlayerTimeControlStatus) {
+        updateLabel()
     }
 
     // MARK: -

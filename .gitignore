@@ -66,5 +66,3 @@ fastlane/screenshots/**/*.png
 fastlane/test_output
 
 Adobe After Effects Auto-Save
-
-AudioPlayerSample/Audio/*.mp3

@@ -12,9 +12,10 @@
 		8504C18320B5712300C3A569 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8504C18120B5712300C3A569 /* Main.storyboard */; };
 		8504C18520B5712600C3A569 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8504C18420B5712600C3A569 /* Assets.xcassets */; };
 		8504C18820B5712600C3A569 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8504C18620B5712600C3A569 /* LaunchScreen.storyboard */; };
-		8504C19520B571B900C3A569 /* go_up.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8504C19120B571B900C3A569 /* go_up.mp3 */; };
-		8504C19620B571B900C3A569 /* out_of_body.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8504C19220B571B900C3A569 /* out_of_body.mp3 */; };
-		8504C19720B571B900C3A569 /* ringo2_unreleased04.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8504C19320B571B900C3A569 /* ringo2_unreleased04.mp3 */; };
+		851C18C720B7013200F75ED1 /* two.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 851C18C420B7013200F75ED1 /* two.mp3 */; };
+		851C18C820B7013200F75ED1 /* three.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 851C18C520B7013200F75ED1 /* three.mp3 */; };
+		851C18C920B7013200F75ED1 /* one.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 851C18C620B7013200F75ED1 /* one.mp3 */; };
+		851C18CB20B70CDC00F75ED1 /* silent.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 851C18CA20B70CDC00F75ED1 /* silent.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,9 +26,10 @@
 		8504C18420B5712600C3A569 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8504C18720B5712600C3A569 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8504C18920B5712600C3A569 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8504C19120B571B900C3A569 /* go_up.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = go_up.mp3; sourceTree = "<group>"; };
-		8504C19220B571B900C3A569 /* out_of_body.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = out_of_body.mp3; sourceTree = "<group>"; };
-		8504C19320B571B900C3A569 /* ringo2_unreleased04.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = ringo2_unreleased04.mp3; sourceTree = "<group>"; };
+		851C18C420B7013200F75ED1 /* two.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = two.mp3; sourceTree = "<group>"; };
+		851C18C520B7013200F75ED1 /* three.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = three.mp3; sourceTree = "<group>"; };
+		851C18C620B7013200F75ED1 /* one.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = one.mp3; sourceTree = "<group>"; };
+		851C18CA20B70CDC00F75ED1 /* silent.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = silent.mp3; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,9 +76,10 @@
 		8504C18F20B571B900C3A569 /* Audio */ = {
 			isa = PBXGroup;
 			children = (
-				8504C19120B571B900C3A569 /* go_up.mp3 */,
-				8504C19220B571B900C3A569 /* out_of_body.mp3 */,
-				8504C19320B571B900C3A569 /* ringo2_unreleased04.mp3 */,
+				851C18CA20B70CDC00F75ED1 /* silent.mp3 */,
+				851C18C620B7013200F75ED1 /* one.mp3 */,
+				851C18C520B7013200F75ED1 /* three.mp3 */,
+				851C18C420B7013200F75ED1 /* two.mp3 */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -139,12 +142,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8504C19620B571B900C3A569 /* out_of_body.mp3 in Resources */,
+				851C18CB20B70CDC00F75ED1 /* silent.mp3 in Resources */,
 				8504C18820B5712600C3A569 /* LaunchScreen.storyboard in Resources */,
-				8504C19720B571B900C3A569 /* ringo2_unreleased04.mp3 in Resources */,
 				8504C18520B5712600C3A569 /* Assets.xcassets in Resources */,
-				8504C19520B571B900C3A569 /* go_up.mp3 in Resources */,
 				8504C18320B5712300C3A569 /* Main.storyboard in Resources */,
+				851C18C920B7013200F75ED1 /* one.mp3 in Resources */,
+				851C18C720B7013200F75ED1 /* two.mp3 in Resources */,
+				851C18C820B7013200F75ED1 /* three.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
