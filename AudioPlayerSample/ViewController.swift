@@ -17,6 +17,7 @@ class ViewController: UIViewController {
     var isPlaying = false
     let tracks = ["one.mp3", "two.mp3", "three.mp3"]
     let silentAudioFileName = "silent.mp3"
+    let silentDuration = CMTimeMakeWithSeconds(1, 1)
     var fullItems: [AVPlayerItem] = []
     var player: AVQueuePlayer!
     var timeObserverToken: Any?
@@ -125,11 +126,36 @@ class ViewController: UIViewController {
         return index
     }
 
+    var previousItem: AVPlayerItem? {
+        guard let currentIndex = currentIndex, currentIndex > 0 else {
+            return nil
+        }
+        return fullItems[currentIndex - 1]
+    }
+
     var playerItemDuration: CMTime {
         guard let item = player?.currentItem, item.status == .readyToPlay else {
             return kCMTimeInvalid
         }
-        return item.duration
+        if isPlayingSilent {
+            if let previousItem = previousItem {
+                return previousItem.duration + silentDuration
+            }
+            return kCMTimeInvalid
+        }
+        let itemDuration = item.duration
+        return itemDuration + silentDuration
+    }
+
+    var silentAudioOffset: CMTime {
+        return CMTimeMakeWithSeconds(20, 1) - silentDuration
+    }
+
+    var isPlayingSilent: Bool {
+        guard let item = player?.currentItem, let asset = item.asset as? AVURLAsset else {
+            return false
+        }
+        return asset.url.lastPathComponent == silentAudioFileName
     }
 
     func navigateToPreviousSentence(loop: Bool = false) {
@@ -157,7 +183,7 @@ class ViewController: UIViewController {
             let url = Bundle.main.url(forResource: trackName, withExtension: nil)!
             fullItems.append(AVPlayerItem(url: url))
             let silentItem = AVPlayerItem(url: silentURL)
-            silentItem.seek(to: CMTimeMakeWithSeconds(10, 1), completionHandler: nil)
+            silentItem.seek(to: silentAudioOffset, completionHandler: nil)
             fullItems.append(silentItem)
         }
         fullItems.forEach { item in
@@ -181,7 +207,15 @@ class ViewController: UIViewController {
             let duration = self.playerItemDuration
             let progress: Float
             if CMTIME_IS_VALID(duration) {
-                progress = Float(CMTimeGetSeconds(time) / CMTimeGetSeconds(duration))
+                if self.isPlayingSilent {
+                    if let previousDuration = self.previousItem?.duration {
+                        progress = Float(CMTimeGetSeconds(time + previousDuration - self.silentAudioOffset) / CMTimeGetSeconds(duration))
+                    } else {
+                        progress = 0
+                    }
+                } else {
+                    progress = Float(CMTimeGetSeconds(time) / CMTimeGetSeconds(duration))
+                }
             } else {
                 progress = 0
             }
@@ -203,6 +237,7 @@ class ViewController: UIViewController {
     }
 
     func updateLabel() {
+        guard !isPlayingSilent else { return }
         let filename = (player.currentItem?.asset as? AVURLAsset)?.url.lastPathComponent
         debugLabel.text = filename
     }
@@ -211,8 +246,6 @@ class ViewController: UIViewController {
                                of object: Any?,
                                change: [NSKeyValueChangeKey : Any]?,
                                context: UnsafeMutableRawPointer?) {
-
-        // Only handle observations for the playerItemContext
         switch context {
         case &playerItemContext:
             guard let playerItem = object as? AVPlayerItem,
