@@ -59,11 +59,11 @@ class ViewController: UIViewController {
             return .success
         }
         commandCenter.nextTrackCommand.addTarget { _ in
-            self.navigateToNextSentence(loop: true)
+            self.navigateToNextTrack(loop: true)
             return .success
         }
         commandCenter.previousTrackCommand.addTarget { _ in
-            self.navigateToPreviousSentence(loop: true)
+            self.navigateToPreviousTrack(loop: true)
             return .success
         }
         commandCenter.togglePlayPauseCommand.addTarget { _ in
@@ -100,7 +100,7 @@ class ViewController: UIViewController {
         playButton.setImage(isPlaying ? #imageLiteral(resourceName: "PauseButton") : #imageLiteral(resourceName: "PlayButton"), for: .normal)
     }
 
-    func navigateToNextSentence(loop: Bool = false) {
+    func navigateToNextTrack(loop: Bool = false) {
         var index: Int
         if let currentIndex = currentIndex {
             index = currentIndex + (currentIndex % 2 == 0 ? 2 : 1)
@@ -158,7 +158,7 @@ class ViewController: UIViewController {
         return asset.url.lastPathComponent == silentAudioFileName
     }
 
-    func navigateToPreviousSentence(loop: Bool = false) {
+    func navigateToPreviousTrack(loop: Bool = false) {
         var index: Int
         if let currentIndex = currentIndex {
             index = currentIndex - (currentIndex % 2 == 0 ? 2 : 1)
@@ -290,11 +290,11 @@ class ViewController: UIViewController {
     }
 
     @IBAction func previousButtonTapped(_ sender: Any) {
-        navigateToPreviousSentence(loop: true)
+        navigateToPreviousTrack(loop: true)
     }
 
     @IBAction func nextButtonTapped(_ sender: Any) {
-        navigateToNextSentence(loop: true)
+        navigateToNextTrack(loop: true)
     }
 
 
