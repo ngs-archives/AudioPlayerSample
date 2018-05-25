@@ -201,7 +201,7 @@ class ViewController: UIViewController {
             player?.removeTimeObserver(timeObserverToken)
         }
         player = AVQueuePlayer(items: Array(items))
-        timeObserverToken = player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1, 1), queue: DispatchQueue.main) { [weak self] (time) in
+        timeObserverToken = player.addPeriodicTimeObserver(forInterval: CMTimeMake(1, 60), queue: DispatchQueue.main) { [weak self] (time) in
             guard let `self` = self else { return }
 
             let duration = self.playerItemDuration
